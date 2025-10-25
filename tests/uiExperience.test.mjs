@@ -14,7 +14,7 @@ async function readSource(relativePath) {
 test('Harmonia experience exposes coordinated UI and store pathways', async () => {
   const appContent = await readSource('src/App.tsx');
   assert.match(appContent, /<AuthModal \/>/, 'App should surface the authentication modal for guests');
-  assert.match(appContent, /<HeaderBar \/>/, 'Authenticated layout should include the header bar');
+  assert.match(appContent, /<HeaderBar\b/, 'Authenticated layout should include the header bar');
   assert.match(appContent, /<ControlPanel \/>/, 'Control panel must mount inside the main workspace grid');
   assert.match(appContent, /<HarmoniaCentralPanel \/>/, 'Central panel should render the core workspace tabs');
   assert.match(appContent, /<FieldNotesPanel \/>/, 'Field notes panel should remain part of the authenticated layout');
@@ -87,7 +87,11 @@ test('Harmonia experience exposes coordinated UI and store pathways', async () =
 
   const authStore = await readSource('src/store/authStore.ts');
   assert.match(authStore, /setOnlineStatus\(newUser.id, true\)/, 'Registration should mark the new operator online');
-  assert.match(authStore, /setOnlineStatus\(user.id, true\)/, 'Login should re-hydrate the operator presence state');
+  assert.match(
+    authStore,
+    /setOnlineStatus\((?:user|normalizedUser)\.id,\s*true\)/,
+    'Login should re-hydrate the operator presence state'
+  );
   assert.match(authStore, /updateProfile/, 'Auth store should expose profile update capabilities');
 
   const friendStore = await readSource('src/store/friendStore.ts');
@@ -114,6 +118,10 @@ test('Harmonia experience exposes coordinated UI and store pathways', async () =
 
   const settingsModal = await readSource('src/components/interface/SettingsModal.tsx');
   assert.match(settingsModal, /Harmonia Settings/, 'Settings modal should surface the Harmonia settings header');
-  assert.match(settingsModal, /Chrono Alignment/, 'Settings modal should expose timezone alignment controls');
-  assert.match(settingsModal, /Mesh Governance/, 'Settings modal should surface mesh governance controls');
+
+  const accountSettings = await readSource('src/components/interface/settings/AccountSettings.tsx');
+  assert.match(accountSettings, /Chrono Alignment/, 'Settings modal should expose timezone alignment controls');
+
+  const privacySettings = await readSource('src/components/interface/settings/PrivacySettings.tsx');
+  assert.match(privacySettings, /Mesh Governance/, 'Settings modal should surface mesh governance controls');
 });
